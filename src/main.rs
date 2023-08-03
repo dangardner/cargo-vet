@@ -45,6 +45,7 @@ use crate::format::{
 use crate::git_tool::Pager;
 use crate::out::{indeterminate_spinner, Out, StderrLogWriter, MULTIPROGRESS};
 use crate::storage::{Cache, Store};
+use crate::server::start_server;
 
 mod cli;
 mod criteria;
@@ -55,6 +56,7 @@ mod git_tool;
 pub mod network;
 mod out;
 pub mod resolver;
+mod server;
 mod serialization;
 pub mod storage;
 mod string_format;
@@ -522,6 +524,7 @@ fn real_main() -> Result<(), miette::Report> {
         Some(Regenerate(Unpublished(sub_args))) => cmd_regenerate_unpublished(&out, &cfg, sub_args),
         Some(Renew(sub_args)) => cmd_renew(&out, &cfg, sub_args),
         Some(Aggregate(_)) | Some(HelpMarkdown(_)) | Some(Gc(_)) => unreachable!("handled earlier"),
+        Some(Server(sub_args)) => cmd_server(&out, &cfg, sub_args),
     }
 }
 
@@ -2659,6 +2662,21 @@ fn cmd_gc(
     cache.gc_sync(DURATION_DAY.mul_f64(sub_args.max_package_age_days));
     Ok(())
 }
+
+fn cmd_server(
+    _out: &Arc<dyn Out>,
+    cfg: &Config,
+    sub_args: &ServerArgs,
+) -> Result<(), miette::Report> {
+    trace!("starting server...");
+
+    // Construct our store
+    let network = Network::acquire(cfg);
+    let store = Arc::<Store>::new(Store::acquire(cfg, network.as_ref(), false).unwrap());
+    tokio::runtime::Handle::current().block_on(start_server(store, sub_args));
+    Ok(())
+}
+
 
 // Utils
 

@@ -400,6 +400,12 @@ pub enum Commands {
     /// It can optionally do this for all audits which are expiring soon.
     #[clap(disable_version_flag = true)]
     Renew(RenewArgs),
+
+    /// Start server
+    ///
+    /// This will run a webserver.
+    #[clap(disable_version_flag = true)]
+    Server(ServerArgs),
 }
 
 #[derive(Subcommand)]
@@ -959,4 +965,17 @@ impl FromStr for GraphFilter {
             Err(e) => Err(convert_error(s, e)),
         }
     }
+}
+
+/// Dumps all audits matching the specified crate, regardless of other criteria
+#[derive(clap::Args)]
+pub struct ServerArgs {
+    /// The IP address to bind to
+    #[clap(action)]
+    #[clap(default_value = "0.0.0.0")]
+    pub listen_addr: String,
+    /// The port to bind to
+    #[clap(action)]
+    #[clap(default_value_t = 3000)]
+    pub listen_port: u16,
 }
