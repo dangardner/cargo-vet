@@ -2673,7 +2673,7 @@ fn cmd_server(
     // Construct our store
     let network = Network::acquire(cfg);
     let store = Arc::<Store>::new(Store::acquire(cfg, network.as_ref(), false).unwrap());
-    tokio::runtime::Handle::current().block_on(start_server(store, sub_args));
+    tokio::runtime::Handle::current().block_on(start_server(store, sub_args, cfg.cli.use_x_forwarded_for));
     Ok(())
 }
 

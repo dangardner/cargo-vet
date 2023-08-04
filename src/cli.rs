@@ -166,6 +166,12 @@ pub struct Cli {
     #[clap(help_heading = "GLOBAL OPTIONS", global = true)]
     pub filter_graph: Option<Vec<GraphFilter>>,
 
+    /// When running the web server, respect client IP addresses in
+    /// X-Forwarded-For request headers, e.g. from an AWS ALB.
+    #[clap(long, action)]
+    #[clap(help_heading = "GLOBAL OPTIONS", global = true)]
+    pub use_x_forwarded_for: bool,
+
     // Args for `Check` when the subcommand is not explicitly specified.
     //
     // These are exclusive with specifying a subcommand due to

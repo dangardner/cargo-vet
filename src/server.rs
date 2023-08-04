@@ -21,8 +21,9 @@ async fn handle(
     store: Arc<Store>,
     addr: IpAddr,
     req: Request<Body>,
+    use_x_forwarded_for: bool,
 ) -> Result<Response<Body>, Error> {
-    let path_chunks: Vec<_> = req.uri().path().split("/").collect();
+    let path_chunks: Vec<_> = req.uri().path().split('/').collect();
     if path_chunks.len() != 3 || path_chunks[1] != "crates" {
         return Response::builder()
             .status(StatusCode::NOT_FOUND)
@@ -30,6 +31,20 @@ async fn handle(
     }
     let package = path_chunks[2];
 
+    let mut addr = addr;
+    if use_x_forwarded_for && req.headers().contains_key("X-Forwarded-For") {
+        if let Some(headervalue) = req
+            .headers()
+            .get("X-Forwarded-For") {
+                if let Ok(s) = headervalue
+                    .to_str() {
+                        let s = s.split(' ').last().unwrap();
+                        if let Ok(ip) = s.parse() {
+                            addr = ip;
+                        }
+                    }
+            }
+    }
     // Log the request
     println!("{} {} {}", addr, req.method(), req.uri());
 
@@ -44,7 +59,6 @@ async fn handle(
     // Iterator over every normal audit.
     let all_audits: Vec<_> = all_audits_files
         .clone()
-        .into_iter()
         .flat_map(|audits_file| {
             audits_file
                 .audits
@@ -61,7 +75,6 @@ async fn handle(
     // Iterator over every wildcard audit.
     let all_wildcard_audits: Vec<_> = all_audits_files
         .clone()
-        .into_iter()
         .flat_map(|audits_file| {
             audits_file
                 .wildcard_audits
@@ -83,7 +96,7 @@ async fn handle(
     Ok(Response::new(Body::from(s)))
 }
 
-pub async fn start_server(store: Arc<Store>, sub_args: &ServerArgs) {
+pub async fn start_server(store: Arc<Store>, sub_args: &ServerArgs, use_x_forwarded_for: bool) {
     // Construct our SocketAddr to listen on...
     let ip: IpAddr = sub_args
         .listen_addr
@@ -96,7 +109,7 @@ pub async fn start_server(store: Arc<Store>, sub_args: &ServerArgs) {
         let store = store.clone();
         let addr = conn.remote_addr().ip();
 
-        let service = service_fn(move |req| handle(store.clone(), addr, req));
+        let service = service_fn(move |req| handle(store.clone(), addr, req, use_x_forwarded_for));
 
         // Return the service to hyper.
         async move { Ok::<_, Infallible>(service) }
