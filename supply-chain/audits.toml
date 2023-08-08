@@ -1,6 +1,46 @@
 
 # cargo-vet audits file
 
+# criteria imported from https://raw.githubusercontent.com/google/supply-chain/main/audits.toml
+
+[criteria.crypto-safe]
+description = ""
+aggregated-from = "https://chromium.googlesource.com/chromiumos/third_party/rust_crates/+/refs/heads/main/cargo-vet/audits.toml?format=TEXT"
+
+[criteria.does-not-implement-crypto]
+description = ""
+implies = "crypto-safe"
+aggregated-from = "https://chromium.googlesource.com/chromiumos/third_party/rust_crates/+/refs/heads/main/cargo-vet/audits.toml?format=TEXT"
+
+[criteria.rule-of-two-safe-to-deploy]
+description = ""
+implies = "safe-to-deploy"
+aggregated-from = "https://chromium.googlesource.com/chromiumos/third_party/rust_crates/+/refs/heads/main/cargo-vet/audits.toml?format=TEXT"
+
+[criteria.ub-risk-0]
+description = ""
+implies = "ub-risk-1"
+aggregated-from = "https://fuchsia.googlesource.com/fuchsia/+/refs/heads/main/third_party/rust_crates/supply-chain/audits.toml?format=TEXT"
+
+[criteria.ub-risk-1]
+description = ""
+implies = "ub-risk-2"
+aggregated-from = "https://fuchsia.googlesource.com/fuchsia/+/refs/heads/main/third_party/rust_crates/supply-chain/audits.toml?format=TEXT"
+
+[criteria.ub-risk-2]
+description = ""
+implies = "ub-risk-3"
+aggregated-from = "https://fuchsia.googlesource.com/fuchsia/+/refs/heads/main/third_party/rust_crates/supply-chain/audits.toml?format=TEXT"
+
+[criteria.ub-risk-3]
+description = ""
+implies = "ub-risk-4"
+aggregated-from = "https://fuchsia.googlesource.com/fuchsia/+/refs/heads/main/third_party/rust_crates/supply-chain/audits.toml?format=TEXT"
+
+[criteria.ub-risk-4]
+description = ""
+aggregated-from = "https://fuchsia.googlesource.com/fuchsia/+/refs/heads/main/third_party/rust_crates/supply-chain/audits.toml?format=TEXT"
+
 [[audits.backtrace]]
 who = "Nika Layzell <nika@thelayzells.com>"
 criteria = "safe-to-deploy"

@@ -200,9 +200,10 @@ fn main() -> Result<(), ()> {
     // the default of 512.
     // This may limit concurrency in some cases, but cargo-vet isn't running a
     // server, and should avoid consuming all available resources.
+    // Except, we are in this fork. So stick with 512.
     let runtime = tokio::runtime::Builder::new_multi_thread()
         .worker_threads(1)
-        .max_blocking_threads(128)
+        .max_blocking_threads(512)
         .enable_all()
         .build()
         .unwrap();
@@ -2672,7 +2673,7 @@ fn cmd_server(
 
     // Construct our store
     let network = Network::acquire(cfg);
-    let store = Arc::<Store>::new(Store::acquire(cfg, network.as_ref(), false).unwrap());
+    let store = Arc::<Store>::new(Store::acquire(cfg, network.as_ref(), true).unwrap());
     tokio::runtime::Handle::current().block_on(start_server(store, sub_args, cfg.cli.use_x_forwarded_for));
     Ok(())
 }

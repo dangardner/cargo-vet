@@ -52,12 +52,10 @@ async fn handle(
     let all_audits_files = store
         .imported_audits()
         .values()
-        .enumerate()
-        .map(|(_import_index, audits_file)| audits_file)
         .chain([&store.audits]);
 
     // Iterator over every normal audit.
-    let all_audits: Vec<_> = all_audits_files
+    let all_audits = all_audits_files
         .clone()
         .flat_map(|audits_file| {
             audits_file
@@ -65,15 +63,10 @@ async fn handle(
                 .get(package)
                 .map(|v| &v[..])
                 .unwrap_or(&[])
-                .iter()
-                .enumerate()
-                .map(move |(_audit_index, audit)| audit)
-                .collect::<Vec<_>>()
-        })
-        .collect();
+        });
 
     // Iterator over every wildcard audit.
-    let all_wildcard_audits: Vec<_> = all_audits_files
+    let all_wildcard_audits = all_audits_files
         .clone()
         .flat_map(|audits_file| {
             audits_file
@@ -81,16 +74,11 @@ async fn handle(
                 .get(package)
                 .map(|v| &v[..])
                 .unwrap_or(&[])
-                .iter()
-                .enumerate()
-                .map(move |(_audit_index, audit)| audit)
-                .collect::<Vec<_>>()
-        })
-        .collect();
+        });
 
     let s = serde_json::to_string(&AuditDump {
-        normal_audits: &all_audits,
-        wildcard_audits: &all_wildcard_audits,
+        normal_audits: &all_audits.collect(),
+        wildcard_audits: &all_wildcard_audits.collect(),
     })
     .unwrap();
     Ok(Response::new(Body::from(s)))
